@@ -1,8 +1,8 @@
-from fastapi import FastAPI, status, HTTPException
-from typing import Optional, Annotated
+from fastapi import FastAPI, status, HTTPException, Form
+from fastapi.responses import JSONResponse
+from typing import Optional, Annotated, List
 import random
-
-from fastapi.params import Query
+from schema import PersonCreateSchema, PersonResponseSchema
 
 app = FastAPI()
 
@@ -24,9 +24,11 @@ def root():
 
 
 # /names (GET(RETRIEVE), POST(CREATE))
-# @app.get("/names")
-# def retrieve_name_list():
-#     return names_list
+@app.get("/names")
+def retrieve_name_list():
+    # return names_list
+    return JSONResponse(content={"details": names_list}, status_code=status.HTTP_200_OK)
+
 
 # @app.get("/names")
 # def retrieve_name_list(q: str | None = None):
@@ -36,18 +38,19 @@ def root():
 #     return names_list
 
 
-@app.get("/names")
+# @app.get("/names")
 # def retrieve_name_list(q: Optional[str] = None):
-def retrieve_name_list(q: Annotated[str | None, Query(max_length=50)] = None):
-    if q:
-        # [Operation, Iteration, Condition]
-        return [item for item in names_list if item["name"] == q]
-    return names_list
+# def retrieve_name_list(q: Annotated[str | None, Query(max_length=50)] = None):
+#     if q:
+#         # [Operation, Iteration, Condition]
+#         return [item for item in names_list if item["name"] == q]
+#     return names_list
 
 
-@app.post("/names", status_code=status.HTTP_201_CREATED)
-def create_name(name: str):
-    name_obj = {"id": random.randint(6, 100), "name": name}
+@app.post("/names", status_code=status.HTTP_201_CREATED, response_model=PersonResponseSchema)
+# def create_name(name: str = Form()):
+def create_name(person: PersonCreateSchema):
+    name_obj = {"id": random.randint(6, 100), "name": person.name}
     names_list.append(name_obj)
     return name_obj
 
